@@ -1,4 +1,5 @@
 import dbus
+import dbus.service
 from xml.etree import ElementTree
 
 '''
@@ -82,11 +83,39 @@ class MediaController:
     def play(self):
         self.mediaPlayer.Play()
 
-
+class PlayerService(dbus.service.Object):
+    mediaController = MediaController()
+    
+    # def __init__(self, mediaController):
+    #     path =  "/org/mpris/MediaPlayer2"
+    #     dbus.service.Object.__init__(self, dbus.SessionBus(), path)
+    
+    @dbus.service.method(dbus_interface='org.mpris.MediaPlayer2',
+                         in_signature='', out_signature='')
+    def Raise(self):
+        print("Raise called")
+    
+    @dbus.service.method(dbus_interface='org.mpris.MediaPlayer2',
+                         in_signature='', out_signature='')
+    def Quit(self):
+        print("Quit called")
+    
+    @dbus.service.method(dbus_interface='org.mpris.MediaPlayer2.Player',
+                         in_signature='', out_signature='')
+    def Next(self):
+        self.mediaController.nextSong()
+        print("calling next")
+        
     
 
 if __name__ == '__main__':
-    mc = MediaController()
+    #DBusGMainLoop(set_as_default=True)
+    #dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+    # mc = MediaController()
+    
+    session_bus = dbus.SessionBus()
+    name = dbus.service.BusName("org.mpris.MediaPlayer2.blue", session_bus)
+    ps = PlayerService(session_bus, '/org/mpris/MediaPlayer2')
     
     from gi.repository import GLib
 
